@@ -1,0 +1,1 @@
+print([X + Y for X in "MiNnie" if X.isupper() for Y in "PlUtO" if Y.islower()])
