@@ -54,7 +54,19 @@ matricola = "2258456"
 coordinate = tuple[int,int]
 
 def func1(board : dict[coordinate, str], side : int) -> str :
-    pass
+    result = ""
+    for i in range(side):
+        row = "|"
+        for j in range(side):
+            if (i,j) in board:
+                row += board[(i,j)] + "|"
+            else:
+                row += " |"
+        result += row + "\n"
+    return result
+
+# test 
+print(func1({(0, 0): "S", (1, 1): "X", (2, 9): "O"}, 10))
 
 
 # %% --------------------------------- Func2 ------------------------- #
@@ -75,9 +87,27 @@ def func1(board : dict[coordinate, str], side : int) -> str :
 # 'lunghezza': '4'}, {'nome': 'Fregata', 'posizione': '3, 3', 'orientamento':
 # 'H', 'lunghezza': '4'}]
 def func2(input_string : str) -> list[dict[str,str]] :
-    pass
+    lista_navi = input_string.split(";")
+    result = []
+    for nave in lista_navi:
+        dati_nave = nave.split(":")
+        nave_dict = {
+            "name": dati_nave[0],
+            "posizione": dati_nave[1],
+            "orientamento": dati_nave[2],
+            "lunghezza": dati_nave[3]
+        }
+        result.append(nave_dict)
+    result.sort(key=lambda x: x["name"])
+    return result
     
-
+# test
+for nave in func2("Fregata:2,3:H:4;Fregata:3,3:H:4"):
+    print(nave)
+    
+# test edge case
+for nave in func2("Torpediniere:5,5:V:2;Fregata:1,1:H:4;Cacciatorpediniere:0,0:V:5"):
+    print(nave)
 
 # %% --------------------------------- Func3 ------------------------- #
 # func3: 7.5 punti
@@ -101,8 +131,44 @@ from typing import Union
 Nave = dict[str, Union[str,coordinate,int]]
 
 def func3(lista_navi : list[Nave]) -> bool :
-    pass
+    counts = [0,0,0,0,0]
+    for nave in lista_navi:
+        if nave["nome"] not in ["Fregata", "Sottomarino", "Torpediniere", "Cacciatorpediniere", "Portaerei"]:
+            return False
+        if nave["nome"] == "Fregata":
+            counts[0] += 1
+        elif nave["nome"] == "Sottomarino":
+            counts[1] += 1
+        elif nave["nome"] == "Torpediniere":
+            counts[2] += 1
+        elif nave["nome"] == "Cacciatorpediniere":
+            counts[3] += 1
+        elif nave["nome"] == "Portaerei":
+            counts[4] += 1
+    return counts == [1,2,2,1,1]
 
+# test
+navi_test = [
+    {"nome": "Fregata", "posizione": (0, 0), "orientamento": "H", "lunghezza": 4},
+    {"nome": "Sottomarino", "posizione": (1, 0), "orientamento": "V", "lunghezza": 3},
+    {"nome": "Sottomarino", "posizione": (2, 0), "orientamento": "V", "lunghezza": 3},
+    {"nome": "Torpediniere", "posizione": (3, 0), "orientamento": "H", "lunghezza": 2},
+    {"nome": "Torpediniere", "posizione": (4, 0), "orientamento": "H", "lunghezza": 2},
+    {"nome": "Cacciatorpediniere", "posizione": (5, 0), "orientamento": "V", "lunghezza": 5},
+    {"nome": "Portaerei", "posizione": (6, 0), "orientamento": "H", "lunghezza": 5}
+]
+print(func3(navi_test))  # Output: True
+
+# test false
+navi_test_false = [
+    {"nome": "Fregata", "posizione": (0, 0), "orientamento": "H", "lunghezza": 4},
+    {"nome": "Sottomarino", "posizione": (1, 0), "orientamento": "V", "lunghezza": 3},
+    {"nome": "Sottomarino", "posizione": (2, 0), "orientamento": "V", "lunghezza": 3},
+    {"nome": "Torpediniere", "posizione": (3, 0), "orientamento": "H", "lunghezza": 2},
+    {"nome": "Cacciatorpediniere", "posizione": (5, 0), "orientamento": "V", "lunghezza": 5},
+    {"nome": "Portaerei", "posizione": (6, 0), "orientamento": "H", "lunghezza": 5}
+]
+print(func3(navi_test_false))  # Output: False
 
 # %% --------------------------------- func4 ------------------------- #
 # func4: 7.5 punti
@@ -122,5 +188,32 @@ def func3(lista_navi : list[Nave]) -> bool :
 #                    {"nome": "Fregata", "posizione": (0, 1), "orientamento":
 #                    "V", "lunghezza": 3}]
 # Output: {(1, 1), (2, 1)}
-def func4(lista_navi : list[Nave]):# -> set[coordinate]:        
-    pass
+def func4(lista_navi : list[Nave]) -> set[coordinate]:        
+    occupate = []
+    sovrapposte = set()
+    for nave in lista_navi:
+        x,y = nave["posizione"]
+        for i in range(nave["lunghezza"]):
+            if nave["orientamento"] == "H":
+                pos = (x, y + i)
+            else:
+                pos = (x + i, y)
+            if pos in occupate and pos not in sovrapposte:
+                sovrapposte.add(pos)
+            else:
+                occupate.append(pos)
+    return sovrapposte
+
+# test
+navi_test = [
+    {"nome": "Sottomarino", "posizione": (1, 1), "orientamento": "V", "lunghezza": 3},
+    {"nome": "Fregata", "posizione": (0, 1), "orientamento": "V", "lunghezza": 3}
+]
+print(func4(navi_test))  # Output: {(1, 1), (2, 1)}
+
+# test no overlap
+navi_test_no_overlap = [
+    {"nome": "Sottomarino", "posizione": (1, 1), "orientamento": "V", "lunghezza": 3},
+    {"nome": "Fregata", "posizione": (0, 3), "orientamento": "V", "lunghezza": 3}
+]
+print(func4(navi_test_no_overlap))  # Output: set()
