@@ -47,3 +47,70 @@ def visd(img, didascalia=''):
     ipd.display(Image(img))                                                                                                     
     if didascalia:                                                                                                                 
         print(didascalia)  
+
+def visd_matplotlib(img: Image, titolo: str = "Visualizzazione Immagine") -> None:
+    """
+    Apre una finestra esterna per visualizzare l'immagine usando Matplotlib.
+    Richiede l'installazione di matplotlib (`pip install matplotlib`).
+    """
+    try:
+        import matplotlib.pyplot as plt
+    except ImportError:
+        print("ERRORE: La libreria 'matplotlib' non è installata.")
+        print("Installala con il comando: pip install matplotlib")
+        return
+
+    # Gestione immagine vuota
+    if not img or not img[0]:
+        print("L'immagine è vuota, nulla da visualizzare.")
+        return
+
+    # Crea la figura
+    plt.figure(figsize=(6, 6))  # Dimensione della finestra (in pollici)
+    
+    # Mostra l'immagine
+    # Matplotlib accetta nativamente liste di liste di tuple (R,G,B)
+    plt.imshow(img)
+    
+    # Aggiungi titolo e rimuovi gli assi (numeri sui bordi)
+    plt.title(titolo)
+    plt.axis('off')
+    
+    # Mostra la finestra (questo comando blocca l'esecuzione finché non chiudi la finestra)
+    plt.show()
+
+def load_immagine_https(img_url: str) -> Image:
+    """
+    Carica un'immagine da un URL HTTPS e la converte nel formato Immagine.
+    Richiede l'installazione di Pillow e requests (`pip install Pillow requests`).
+    """
+    try:
+        from PIL import Image
+        import requests
+        from io import BytesIO
+    except ImportError:
+        print("ERRORE: Le librerie 'Pillow' e 'requests' non sono installate.")
+        print("Installale con il comando: pip install Pillow requests")
+        return []
+
+    # Scarica l'immagine
+    response = requests.get(img_url)
+    if response.status_code != 200:
+        print(f"ERRORE: Impossibile scaricare l'immagine. Status code: {response.status_code}")
+        return []
+
+    # Apri l'immagine con Pillow
+    img_pil = Image.open(BytesIO(response.content)).convert('RGB')
+    
+    # Converti in formato Immagine
+    larghezza, altezza = img_pil.size
+    img = crea_immagine(larghezza, altezza)
+    
+    for y in range(altezza):
+        for x in range(larghezza):
+            img[y][x] = img_pil.getpixel((x, y))
+    
+    return img
+
+def crea_immagine(larghezza : int, altezza: int, colore: tuple = (0, 0, 0)) -> Image:
+    return [[colore] * larghezza for _ in range(altezza)]

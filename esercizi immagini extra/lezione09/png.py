@@ -168,7 +168,9 @@ try:
     # pngfilters`).
     import cpngfilters as pngfilters
 except ImportError:
-    pass
+    # Se l'import fallisce, definiamo pngfilters come None per ora
+    # Le implementazioni pure Python saranno definite più avanti
+    pngfilters = None
 
 
 __all__ = ['Image', 'Reader', 'Writer', 'write_chunks', 'from_array']
@@ -2243,9 +2245,7 @@ def isinteger(x):
 
 # === Support for users without Cython ===
 
-try:
-    pngfilters
-except NameError:
+if pngfilters is None:
     class pngfilters(object):
         def undo_filter_sub(filter_unit, scanline, previous, result):
             """Undo sub filter."""

@@ -44,7 +44,15 @@ def check_test(func: Callable, expected: Any, *args: List[Any]):
 # Per leggere/scrivere l'immagine usare i comandi load/save del modulo "images" visto a lezione.
 # Controllare il file risultante per verificare la correttezza della funzione (non vengono effettuati test automatici)
 def img_grayscale(img_in: str, img_out: str):
-    pass
+    img = images.load(img_in)
+    gray_img = []
+    for row in img:
+        gray_row = []
+        for (R, G, B) in row:
+            gray_value = int(0.2126 * R + 0.7152 * G + 0.0722 * B)
+            gray_row.append((gray_value, gray_value, gray_value))
+        gray_img.append(gray_row)
+    images.visd_matplotlib(gray_img)
 
 
 # Definire una funzione che dato il nome di un file (img_in) contenente un'immagine,
@@ -59,7 +67,23 @@ def img_grayscale(img_in: str, img_out: str):
 # Per leggere/scrivere l'immagine usare i comandi load/save del modulo "images" visto a lezione.
 # Controllare il file risultante per verificare la correttezza della funzione (non vengono effettuati test automatici)
 def img_rotate(img_in: str, theta: float, img_out: str):
-    pass
+    theta_rad = math.radians(theta)
+    cos_theta = math.cos(theta_rad)
+    sin_theta = math.sin(theta_rad)
+    img = images.load(img_in)
+    height = len(img)
+    width = len(img[0])
+    cx, cy = width / 2, height / 2
+    rotated_img = [[(0, 0, 0) for _ in range(width)] for _ in range(height)]
+    for y in range(height):
+        for x in range(width):
+            x_rel = x - cx
+            y_rel = y - cy
+            x_src = int(cx + (x_rel * cos_theta + y_rel * sin_theta))
+            y_src = int(cy + (-x_rel * sin_theta + y_rel * cos_theta))
+            if 0 <= x_src < width and 0 <= y_src < height:
+                rotated_img[y][x] = img[y_src][x_src]
+    images.visd_matplotlib(rotated_img)
 
 
 # Definire una funzione che disegna un cerchio centrato in (x,y) e di raggio r,
@@ -68,7 +92,17 @@ def img_rotate(img_in: str, theta: float, img_out: str):
 # guardando se la distanza dal center è <= raggio. Nel caso settiamo il colore c.
 # Il centro di ogni pixel è translato di 0.5 rispetto agli indici dei pixels.
 def img_circle(img_in: str, x: float, y: float, r: float, c: Tuple, img_out: str):
-    pass
+    img = images.load(img_in)
+    height = len(img)
+    width = len(img[0])
+    for j in range(height):
+        for i in range(width):
+            pixel_center_x = i + 0.5
+            pixel_center_y = j + 0.5
+            distance = math.sqrt((pixel_center_x - x) ** 2 + (pixel_center_y - y) ** 2)
+            if distance <= r:
+                img[j][i] = c
+    images.visd_matplotlib(img)
 
 
 # Definire una funzione che applica aggiunstamenti di colore ad una immagine.
@@ -79,7 +113,32 @@ def img_circle(img_in: str, x: float, y: float, r: float, c: Tuple, img_out: str
 # (b) contrasto: pixel = (pixel - 0.5) * c + 0.5
 # (c) saturazione: pixel = (pixel - gray(pixel)) * s + gray(pixel)
 def img_colorgrade(img_in: str, t: tuple, c: float, s: float, img_out: str):
-    pass
+    img = images.load(img_in)
+    height = len(img)
+    width = len(img[0])
+    for j in range(height):
+        for i in range(width):
+            R, G, B = img[j][i]
+            Rf, Gf, Bf = R/255.0, G/255.0, B/255.0
+            # Apply tint
+            Rf *= t[0]
+            Gf *= t[1]
+            Bf *= t[2]
+            # Apply contrast
+            Rf = (Rf - 0.5) * c + 0.5
+            Gf = (Gf - 0.5) * c + 0.5
+            Bf = (Bf - 0.5) * c + 0.5
+            # Apply saturation
+            gray = 0.2126 * Rf + 0.7152 * Gf + 0.0722 * Bf
+            Rf = (Rf - gray) * s + gray
+            Gf = (Gf - gray) * s + gray
+            Bf = (Bf - gray) * s + gray
+            # Convert back to [0,255]
+            R_new = max(0, min(255, int(Rf * 255)))
+            G_new = max(0, min(255, int(Gf * 255)))
+            B_new = max(0, min(255, int(Bf * 255)))
+            img[j][i] = (R_new, G_new, B_new)
+    images.visd_matplotlib(img)
 
 
 # Definire una funzione che crea un mosaico sui pixel di una immagine. Il mosaico
@@ -87,16 +146,36 @@ def img_colorgrade(img_in: str, t: tuple, c: float, s: float, img_out: str):
 # non ci preoccupiamo di fare la media. Inoltre disegniamo anche delle linee nere
 # intorno a ogni cella del mosaico.
 def img_mosaic(img_in: str, n: int, img_out: str):
-    pass
+    img = images.load(img_in)
+    height = len(img)
+    width = len(img[0])
+    for j in range(0, height, n):
+        for i in range(0, width, n):
+            for y in range(j, min(j + n, height)):
+                for x in range(i, min(i + n, width)):
+                    # Set cell color (media dei pixel)
+                    img[y][x] = img[j][i]
+            # Draw black borders
+            for x in range(i, min(i + n, width)):
+                if j < height:
+                    img[j][x] = (0, 0, 0)
+                if j + n - 1 < height:
+                    img[min(j + n - 1, height - 1)][x] = (0, 0, 0)
+            for y in range(j, min(j + n, height)):
+                if i < width:
+                    img[y][i] = (0, 0, 0)
+                if i + n - 1 < width:
+                    img[y][min(i + n - 1, width - 1)] = (0, 0, 0)
+    images.visd_matplotlib(img)
 
 
 # Test funzioni
-img_grayscale("img1.png", "img1_grayscale.png")
+img_grayscale("esercizi immagini/esercizi immagini/img1.png", "esercizi immagini/esercizi immagini/img1_grayscale.png")
 for angle in [-30, 15, 30, 45, 480, -500]:
-    img_rotate("img1.png", angle, "img1_rotated_" + str(angle) + ".png")
-img_circle("img1.png", 100, 100, 25, (255, 255, 0), "img1_circle.png")
-img_colorgrade("img1.png", (0.9, 1.0, 0.9), 1, 1, "img_colorgrade1.png")
-img_colorgrade("img1.png", (1.0, 1.0, 1.0), 2, 1, "img_colorgrade2.png")
-img_colorgrade("img1.png", (1.0, 1.0, 1.0), 1, 2, "img_colorgrade3.png")
-img_colorgrade("img1.png", (0.8, 1.0, 0.8), 2, 0.7, "img_colorgrade4.png")
-img_mosaic("img1.png", 16, "img_mosaic.png")
+    img_rotate("esercizi immagini/esercizi immagini/img1.png", angle, "esercizi immagini/esercizi immagini/img1_rotated_" + str(angle) + ".png")
+img_circle("esercizi immagini/esercizi immagini/img1.png", 100, 100, 25, (255, 255, 0), "esercizi immagini/esercizi immagini/img1_circle.png")
+img_colorgrade("esercizi immagini/esercizi immagini/img1.png", (0.9, 1.0, 0.9), 1, 1, "esercizi immagini/esercizi immagini/img_colorgrade1.png")
+img_colorgrade("esercizi immagini/esercizi immagini/img1.png", (1.0, 1.0, 1.0), 2, 1, "esercizi immagini/esercizi immagini/img_colorgrade2.png")
+img_colorgrade("esercizi immagini/esercizi immagini/img1.png", (1.0, 1.0, 1.0), 1, 2, "esercizi immagini/esercizi immagini/img_colorgrade3.png")
+img_colorgrade("esercizi immagini/esercizi immagini/img1.png", (0.8, 1.0, 0.8), 2, 0.7, "esercizi immagini/esercizi immagini/img_colorgrade4.png")
+img_mosaic("esercizi immagini/esercizi immagini/img1.png", 3, "esercizi immagini/esercizi immagini/img_mosaic.png")
