@@ -47,3 +47,34 @@ def visd(img, didascalia=''):
     ipd.display(Image(img))                                                                                                     
     if didascalia:                                                                                                                 
         print(didascalia)  
+
+def visd_matplotlib(img: Image, titolo: str = "Visualizzazione Immagine") -> None:
+    """
+    Apre una finestra esterna per visualizzare l'immagine usando Matplotlib.
+    Richiede l'installazione di matplotlib (`pip install matplotlib`).
+    """
+    try:
+        import matplotlib.pyplot as plt
+    except ImportError:
+        print("ERRORE: La libreria 'matplotlib' non è installata.")
+        print("Installala con il comando: pip install matplotlib")
+        return
+
+    # Gestione immagine vuota
+    if not img or not img[0]:
+        print("L'immagine è vuota, nulla da visualizzare.")
+        return
+
+    # Crea la figura
+    plt.figure(figsize=(6, 6))  # Dimensione della finestra (in pollici)
+    
+    # Mostra l'immagine
+    # Matplotlib accetta nativamente liste di liste di tuple (R,G,B)
+    plt.imshow(img)
+    
+    # Aggiungi titolo e rimuovi gli assi (numeri sui bordi)
+    plt.title(titolo)
+    plt.axis('off')
+    
+    # Mostra la finestra (questo comando blocca l'esecuzione finché non chiudi la finestra)
+    plt.show()
