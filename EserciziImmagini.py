@@ -16,7 +16,8 @@ def crea_bandiera_italiana(altezza: int) -> immagini.Immagine:
     return img
 
 immagine_italiana = crea_bandiera_italiana(300)
-#immagini.visd_matplotlib(immagine_italiana)
+immagini.visd_matplotlib(immagine_italiana) 
+"""TO DO: commentare per evitare l'apertura della finestra"""
 
 def disegna_griglia(img: immagini.Immagine, N: int, colore: immagini.Colore) -> None:
     #N-1 righe e colonne
