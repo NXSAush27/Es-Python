@@ -1,5 +1,6 @@
 
 import copy
+from labirinto_variabile import labirinto
 
 def es38(labirinto):
     ''' 
@@ -47,6 +48,34 @@ def es38(labirinto):
                 return (x, y)
     return None
 
+def print_labirinto(labirinto):
+    for row in labirinto:
+        print(''.join(str(cell) for cell in row))
+
+def trasforma_labirinto_in_immagine(labirinto):
+    from PIL import Image
+    height = len(labirinto)
+    width = len(labirinto[0]) if height > 0 else 0
+    img = Image.new('RGB', (width, height), "white")
+    pixels = img.load()
+    for y in range(height):
+        for x in range(width):
+            if labirinto[y][x] == 1:
+                pixels[x, y] = (0, 0, 0)  # nero per ostacoli
+            else:
+                pixels[x, y] = (255, 255, 255)  # bianco per celle libere
+    img.show()
+
+labirinto_piccolo = [[0, 0, 0, 1, 0, 0, 0],
+             [1, 0, 0, 0, 0, 1, 0], 
+             [0, 0, 0, 1, 0, 1, 0], 
+             [1, 0, 1, 0, 0, 1, 0], 
+             [0, 0, 1, 1, 0, 1, 0], 
+             [1, 0, 0, 1, 0, 1, 1], 
+             [0, 1, 1, 0, 1, 0, 0]]
+
+labirinto_grande = labirinto
+trasforma_labirinto_in_immagine(labirinto=labirinto_grande)
 
 
 
