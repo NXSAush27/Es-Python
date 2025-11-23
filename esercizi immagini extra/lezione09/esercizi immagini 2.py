@@ -263,8 +263,8 @@ def img_mosaic(img_in: str, n: int, img_out: str):
     #           "esercizi immagini/esercizi immagini/img1_rotated_" + str(angle) + ".png")
 
 # Test del disegno di un cerchio (giallo) al centro dell'immagine
-#img_circle("esercizi immagini/esercizi immagini/img1.png", 100, 100, 25, (255, 255, 0),
-#           "esercizi immagini/esercizi immagini/img1_circle.png")  # Centro (100,100), raggio 25, colore giallo
+img_circle("esercizi immagini/esercizi immagini/img1.png", 100, 100, 25, (255, 255, 0),
+           "esercizi immagini/esercizi immagini/img1_circle.png")  # Centro (100,100), raggio 25, colore giallo
 
 # Test delle regolazioni di colore con parametri diversi per osservare gli effetti
 # Test 1: Tinta leggermente verdastra con contrasto e saturazione normali
