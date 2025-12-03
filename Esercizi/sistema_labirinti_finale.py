@@ -124,7 +124,7 @@ def demo_labirinto_completo():
     
     # Visualizza
     stampa_labirinto_testuale(labirinto, 8, 40)
-    
+    trasforma_labirinto_in_immagine(labirinto)
     # Confronta algoritmi
     print("\n" + "="*50)
     confronta_algoritmi()
