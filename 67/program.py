@@ -32,7 +32,7 @@ def es67(path):
     return {k: massimi[k]-minimi[k] for k in minimi}
 
 def minmassimi(path, m, M, prof):
-    for fn in os.listdir(path):
+    for fn in os.listdir(os.curdir() +path):
         if '.' == fn[0]: continue
         filename = path + '/' + fn
         if os.path.isdir(filename):
