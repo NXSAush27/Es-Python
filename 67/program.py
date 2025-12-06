@@ -28,11 +28,11 @@ def es67(path):
     """
     minimi = {}
     massimi = {}
-    minmassimi(path, minimi, massimi, 0)
+    minmassimi("C:/Users/Utente/Desktop/Projects/Es-Python/67/"+path, minimi, massimi, 0)
     return {k: massimi[k]-minimi[k] for k in minimi}
 
 def minmassimi(path, m, M, prof):
-    for fn in os.listdir(os.curdir() +path):
+    for fn in os.listdir(path):
         if '.' == fn[0]: continue
         filename = path + '/' + fn
         if os.path.isdir(filename):
