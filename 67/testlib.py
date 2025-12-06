@@ -104,7 +104,8 @@ class TestCase(unittest.TestCase):
     @classmethod
     def main(cls):
         suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(cls))
+        loader = unittest.TestLoader()
+        suite.addTest(loader.loadTestsFromTestCase(cls))
         runner = unittest.TextTestRunner(stream=sys.stdout, verbosity=2)
         result = runner.run(suite)
         failed = len(result.failures)
