@@ -8,7 +8,7 @@
 """ Operazioni da fare PRIMA DI TUTTO:
  1) Salvare questo file col nome program.py
  2) Assegnare le variabili sottostanti con il tuo
-    NOME, COGNOME, NUMERO DI MATRICOLA
+      NOME, COGNOME, NUMERO DI MATRICOLA
 
 Per superare la prova è necessario:
     - !!!riempire le informazioni personali nelle variabili qui sotto!!!
@@ -35,6 +35,34 @@ matricola  = "2258456"
 # numero di riga in program.py ha generato l'errore.
 ################################################################################
 
+# Helper function to automatically handle file paths
+import os
+
+def get_correct_path(relative_path):
+    """
+    Automatically detects and adjusts file paths to work from any location.
+    
+    This function checks if the given relative path exists from the current working directory.
+    If not, it tries the SM5 subdirectory and adjusts the path accordingly.
+    
+    Args:
+        relative_path (str): The relative path to adjust
+        
+    Returns:
+        str: The correct absolute path that works from any directory
+    """
+    # If the path already exists from current directory, use it as-is
+    if os.path.exists(relative_path):
+        return relative_path
+    
+    # If the file doesn't exist, try with SM5 prefix
+    sm5_path = os.path.join('SM5', relative_path)
+    if os.path.exists(sm5_path):
+        return sm5_path
+    
+    # If still not found, return the original path (will raise an error when trying to use it)
+    return relative_path
+
 # %% ----------------------------------- FUNC.1 ----------------------------------- #
 """
 Func 1: 2 punti
@@ -47,20 +75,22 @@ e che ritorna l'insieme delle parole che appaiono esattamente K volte nel testo.
 
 Esempio:
 K = 2
-testo = '''sopra la panca la capra campa, sotto la panca la capra crepa!'''
+testo = '''sopra la panca la capra camps, sotto la panca la capra crepa!'''
 expected = {'capra', 'panca'}
 
 """
+import re
 def func1(testo : str, K : int) -> set[str]:
+    # Rimuovi la punteggiatura e dividi in parole
+    parole = re.findall(r'\b[a-zA-Z]+\b', testo.lower())
     
+    # Conta le occorrenze di ogni parola
+    from collections import Counter
+    contatore = Counter(parole)
+    
+    # Ritorna le parole che appaiono esattamente K volte
+    return {parola for parola, count in contatore.items() if count == K}
 
-
-"""
-K = 2
-testo = '''sopra la panca la capra campa, sotto la panca la capra crepa'''
-expected = {'capra', 'panca'}
-print(func1(testo,K))
-"""
 
 # %% ----------------------------------- FUNC.2 ----------------------------------- #
 """
@@ -83,16 +113,21 @@ expected = {'s': ['sei', 'sotto', 'sopra', 'sicuro'],
             'm': ['mentre']}
 """
 def func2(parole : list[str]) -> dict[str, list[str]]:
-    pass
-    # completa la funzione
+    risultato = {}
+    
+    for parola in parole:
+        iniziale = parola[0].lower()
+        if iniziale not in risultato:
+            risultato[iniziale] = []
+        risultato[iniziale].append(parola)
+    
+    # Ordina ogni lista per lunghezza crescente e in caso di parità per ordine alfabetico decrescente
+    for chiave in risultato:
+        risultato[chiave].sort(key=lambda x: (len(x), -ord(x[0]) if x else 0))
+    
+    return risultato
 
 
-
-'''
-parole = ['sei','sicuro','che','sopra','la','panca','le','capre','campino?',
-        'certamente,','mentre','sotto','la','panca','le','capre','crepano!']
-print(func2(parole))
-'''
 
 # %% ----------------------------------- FUNC.3 ----------------------------------- #
 """
@@ -114,23 +149,34 @@ D2 = { 1:['a','bb','ccc'], 3:['qq','z'], 5:['b','fff'] }
 expected = {'a': ['a', 'z', 'bb', 'qq', 'ccc'], 'b': ['b', 'z', 'qq', 'fff']}
 """
 def func3(D1 : dict[str,list[int]], D2 : dict[int,list[str]]) -> dict[str, list[str]]:
-    pass
-    # completa la funzione
+    risultato = {}
+    
+    for parola, numeri in D1.items():
+        # Trova i numeri che sono chiavi in D2
+        numeri_comuni = [n for n in numeri if n in D2]
+        
+        if numeri_comuni:
+            # Raccogli tutte le parole associate a questi numeri
+            parole_raccolte = []
+            for num in numeri_comuni:
+                parole_raccolte.extend(D2[num])
+            
+            # Rimuovi duplicati mantenendo l'ordine
+            parole_uniche = list(dict.fromkeys(parole_raccolte))
+            
+            # Ordina per lunghezza decrescente e poi alfabeticamente crescente
+            parole_uniche.sort(key=lambda x: (-len(x), x))
+            
+            risultato[parola] = parole_uniche
+    
+    return risultato
 
 
-
-
-"""
-D1 = { 'a':[1,2,3], 'b':[3,4,5] }
-D2 = { 1:['a','bb','ccc'], 3:['qq','z'], 5:['b','fff'] }
-print(func3(D1,D2))
-"""
-
-# %% ----------------------------------- FUNC.3 ----------------------------------- #
+# %% ----------------------------------- FUNC.4 ----------------------------------- #
 """
 Func 4: 6 punti
 
-Implementa la funzione    func4(path_in : str, path_out : str, K : int) -> dict[str, list[str]]
+Implementa la funzione    func4(path_in : str, path_out : str, K : int) -> dict[str, list[int]]
 che riceve come argomenti:
     - path_in:  un percorso ad un file di testo da leggere
     - path_out: un percorso ad un file di testo da scrivere
@@ -161,11 +207,42 @@ Il file out_1.txt conterrà:
 e la funzione restituirà:
     {'a': [0, 2], 'b': [0, 2, 3], 'aa': [1, 3]}
 """
-def func4(path_in : str, path_out : str, K : int) -> dict[str, list[str]]:
-    pass
-    # completa la funzione
+import re
+from collections import defaultdict
 
-
+def func4(path_in : str, path_out : str, K : int) -> dict[str, list[int]]:
+    # Use the helper function to get the correct path
+    correct_path_in = get_correct_path(path_in)
+    correct_path_out = get_correct_path(path_out)
+    
+    # Leggi il file
+    with open(correct_path_in, 'r') as f:
+        righe = f.readlines()
+    
+    # Dizionario per memorizzare le righe in cui appare ogni parola
+    parole_righe = defaultdict(list)
+    
+    for num_riga, riga in enumerate(righe):
+        # Estrai solo le parole (caratteri alfabetici)
+        parole = re.findall(r'\b[a-zA-Z]+\b', riga.lower())
+        
+        # Aggiungi il numero di riga per ogni parola unica in quella riga
+        parole_uniche = set(parole)
+        for parola in parole_uniche:
+            parole_righe[parola].append(num_riga)
+    
+    # Filtra le parole che appaiono almeno K volte
+    risultato = {parola: righe for parola, righe in parole_righe.items() if len(righe) >= K}
+    
+    # Scrivi il file di output
+    with open(correct_path_out, 'w') as f:
+        # Ordina per numero di righe decrescente, poi alfabeticamente
+        parole_ordinate = sorted(risultato.items(), key=lambda x: (-len(x[1]), x[0]))
+        
+        for parola, righe in parole_ordinate:
+            f.write(f"{parola} {len(righe)}\n")
+    
+    return risultato
 
 
 # %% ----------------------------------- FUNC.5 ----------------------------------- #
@@ -190,9 +267,42 @@ path_png_in = 'func5/in_1.png'
 expected = {'a': [0, 2], 'b': [0, 2, 3], 'aa': [1, 3]}
 """
 import images
-def func5(path_png_in : str) -> dict[str, set[tuple[int,int]]]:
-    pass
-    # completa la funzione
+
+def func5(path_png_in : str) -> dict[tuple[int,int,int], set[tuple[int,int]]]:
+    # Use the helper function to get the correct path
+    correct_path_png_in = get_correct_path(path_png_in)
+    
+    # Carica l'immagine
+    img = images.load(correct_path_png_in)
+    altezza = len(img)
+    larghezza = len(img[0]) if altezza > 0 else 0
+    
+    # Dizionario per memorizzare le posizioni per ogni colore
+    risultato = {}
+    
+    # Scorri tutti i possibili quadrati 2x2
+    for y in range(altezza - 1):
+        for x in range(larghezza - 1):
+            # Ottieni i 4 pixel del quadrato
+            colore1 = img[y][x]
+            colore2 = img[y][x + 1]
+            colore3 = img[y + 1][x]
+            colore4 = img[y + 1][x + 1]
+            
+            # Controlla se tutti e 4 i pixel hanno lo stesso colore
+            if colore1 == colore2 == colore3 == colore4:
+                # Converti il colore in una rappresentazione hashable (tupla)
+                if isinstance(colore1, (list, tuple)) and len(colore1) >= 3:
+                    colore_chiave = tuple(colore1[:3])  # Prendi solo RGB
+                else:
+                    colore_chiave = colore1
+                
+                # Aggiungi la posizione al risultato
+                if colore_chiave not in risultato:
+                    risultato[colore_chiave] = set()
+                risultato[colore_chiave].add((x, y))
+    
+    return risultato
 
 
 # %% ----------------------------------- EX.1 ----------------------------------- #
@@ -226,18 +336,33 @@ l'albero in output sarà:
 12   15    18
 """
 import tree
+
 def ex1(radice : tree.BinaryTree, lista_pesi:list[int]) -> tree.BinaryTree:
-    pass
-    # completa la funzione
-
-
+    def costruisci_albero(nodo, profondita):
+        if nodo is None:
+            return None
+        
+        # Calcola il nuovo valore per questo nodo
+        peso = lista_pesi[profondita] if profondita < len(lista_pesi) else 1
+        nuovo_valore = nodo.value * peso
+        
+        # Crea il nuovo nodo
+        nuovo_nodo = tree.BinaryTree(nuovo_valore)
+        
+        # Costruisci ricorsivamente i figli
+        nuovo_nodo.left = costruisci_albero(nodo.left, profondita + 1)
+        nuovo_nodo.right = costruisci_albero(nodo.right, profondita + 1)
+        
+        return nuovo_nodo
+    
+    return costruisci_albero(radice, 0)
 
 
 # %% ----------------------------------- EX.2 ----------------------------------- #
 """
 Ex 2: 6 punti
 
-Implementa la funzione    ex2(path : str, lista_estensioni : list[str]) -> dict[str, list[str]]
+Implementa la funzione    ex2(path : str, lista_estensioni : list[str]) -> dict[str, set[str]]
 che riceve come argomento:
 - path: il path di una directory
 - lista_estensioni: una lista di estensioni di file (stringhe)
@@ -255,11 +380,63 @@ Esempio:
     expected   = {'txt': {'ex2/A/C', 'ex2/A', 'ex2/A/B'}, 'pdf': {'ex2/A/C', 'ex2/A'}, 'png': {'ex2/A/C'}, 'gif': {'ex2/A/C'}}
 """
 import os
-def ex2(path : str, lista_estensioni : list[str]) -> dict[str, list[str]]:
-    pass
-    # completa la funzione
 
-
+def ex2(path : str, lista_estensioni : list[str]) -> dict[str, set[str]]:
+    # Use the helper function to get the correct path for directory exploration
+    correct_path = get_correct_path(path)
+    
+    # Inizializza il risultato
+    risultato = {est: set() for est in lista_estensioni}
+    
+    # Simple logic: if corrected path contains SM5, we need to strip it
+    needs_strip = 'SM5' in correct_path and 'SM5' not in path
+    
+    def esplora_directory(dir_path):
+        try:
+            # Lista tutti i file e directory nella directory corrente
+            elementi = os.listdir(dir_path)
+            
+            # Processa ogni elemento
+            for elemento in elementi:
+                elemento_path = os.path.join(dir_path, elemento)
+                
+                if os.path.isfile(elemento_path):
+                    # È un file, controlla l'estensione
+                    if '.' in elemento:
+                        estensione = elemento.split('.')[-1].lower()
+                        if estensione in lista_estensioni:
+                            # Calculate the path to return
+                            return_path = dir_path
+                            if needs_strip:
+                                # Remove SM5 prefix and normalize
+                                if 'SM5' in dir_path:
+                                    return_path = dir_path.replace('\\', '/')
+                                    # Remove SM5 prefix and leading slash
+                                    if return_path.startswith('SM5/'):
+                                        return_path = return_path[4:]
+                                    elif '/SM5/' in return_path:
+                                        return_path = return_path.replace('/SM5/', '/')
+                                    # Remove leading slash if any
+                                    if return_path.startswith('/'):
+                                        return_path = return_path[1:]
+                            
+                            # Normalizza il path per usare forward slash
+                            normalized_path = return_path.replace('\\', '/')
+                            # Aggiungi la directory corrente al risultato per questa estensione
+                            risultato[estensione].add(normalized_path)
+                
+                elif os.path.isdir(elemento_path):
+                    # È una directory, esplora ricorsivamente
+                    esplora_directory(elemento_path)
+        
+        except (PermissionError, OSError):
+            # Ignora errori di permessi o altri errori del sistema
+            pass
+    
+    # Avvia l'esplorazione dalla directory iniziale
+    esplora_directory(correct_path)
+    
+    return risultato
 
 
 ######################################################################################
@@ -272,5 +449,3 @@ if __name__ == '__main__':
     print(
         'Altrimenii puoi inserire qui del codice per testare le tue funzioni ma devi scriverti i casi che vuoi testare')
     print('*' * 50)
-
-

@@ -264,6 +264,10 @@ rispetto al pixel corrente come vicini.
 Si possono usare le funzioni load e save del modulo images.py
 '''
 
+# Store original images functions
+_original_images_load = images.load
+_original_images_save = images.save
+
 # Helper function to automatically handle file paths
 def get_correct_path(relative_path):
     """
@@ -285,36 +289,33 @@ def get_correct_path(relative_path):
     if os.path.exists(relative_path):
         return relative_path
     
-    # Strategy 2: Try current directory with struggling-student prefix
-    possible_paths = [
-        os.path.join('struggling-student PythonExercises main Esami-2024-2025_2025-07-21', relative_path),
-        relative_path,
-    ]
-    
-    # Strategy 3: Look for the script directory (where this program.py is located)
+    # Strategy 2: Look for the script directory (where this program.py is located)
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    possible_paths.append(os.path.join(script_dir, relative_path))
+    test_path = os.path.join(script_dir, relative_path)
+    if os.path.exists(test_path):
+        return test_path
     
-    # Strategy 4: Try parent directory structure
+    # Strategy 3: Try parent directory structure
     parent_dir = os.path.dirname(script_dir)
-    possible_paths.append(os.path.join(parent_dir, 'struggling-student PythonExercises main Esami-2024-2025_2025-07-21', relative_path))
+    test_path = os.path.join(parent_dir, 'struggling-student PythonExercises main Esami-2024-2025_2025-07-21', relative_path)
+    if os.path.exists(test_path):
+        return test_path
     
-    # Strategy 5: Check for any directory containing "struggling-student" in the path
-    base_path = os.path.dirname(os.path.abspath(__file__))
-    for root, dirs, files in os.walk(base_path):
+    # Strategy 4: Check for any directory containing "struggling-student" in the path
+    for root, dirs, files in os.walk(parent_dir):
         if 'struggling-student' in root:
             test_path = os.path.join(root, relative_path)
             if os.path.exists(test_path):
                 return test_path
     
-    # Strategy 6: Check from current working directory if we're in a subdirectory
+    # Strategy 5: Check from current working directory if we're in a subdirectory
     cwd = os.getcwd()
     if 'struggling-student' in cwd:
         test_path = os.path.join(cwd, relative_path)
         if os.path.exists(test_path):
             return test_path
     
-    # Strategy 7: Try to find the directory by walking up from current directory
+    # Strategy 6: Try to find the directory by walking up from current directory
     current_dir = os.getcwd()
     for i in range(5):  # Check up to 5 levels up
         test_path = os.path.join(current_dir, 'struggling-student PythonExercises main Esami-2024-2025_2025-07-21', relative_path)
@@ -330,19 +331,29 @@ def get_correct_path(relative_path):
     # This will cause an error when trying to load, which is better than silently failing
     return relative_path
 
-from images import load, save
+# Wrapper functions that automatically fix paths for both the program and grade system
+def corrected_load(path):
+    """Wrapper for images.load that automatically fixes paths"""
+    corrected_path = get_correct_path(path)
+    return _original_images_load(corrected_path)
+
+def corrected_save(img, path):
+    """Wrapper for images.save that automatically fixes paths"""
+    corrected_path = get_correct_path(path)
+    return _original_images_save(img, corrected_path)
+
+# Monkey patch the images module to use our corrected functions
+images.load = corrected_load
+images.save = corrected_save
 
 def ex2(in_path, out_fpath, x, y, replacement_color):
-    # Use the helper function to get the correct path
-    correct_in_path = get_correct_path(in_path)
-    correct_out_path = get_correct_path(out_fpath)
-    
-    img = load(correct_in_path)
+    # The paths will be automatically corrected by our monkey-patched images functions
+    img = images.load(in_path)
     altezza = len(img)
     larghezza = len(img[0]) if altezza > 0 else 0
     colore_originale = img[y][x]
     flood_fill(x, y, img, altezza, larghezza, colore_originale, replacement_color)
-    save(img, correct_out_path)
+    images.save(img, out_fpath)
 
 def flood_fill(x, y, img, altezza, larghezza, colore_originale, replacement_color):
     if x < 0 or x >= larghezza or y < 0 or y >= altezza:

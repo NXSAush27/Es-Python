@@ -488,7 +488,7 @@ tests = [
     #test_func5_1, test_func5_2, test_func5_3, test_func5_4,     # 8   / 4
 
     #test_ex1_1,    test_ex1_2,   test_ex1_3,                    # 6   / 3
-    #test_ex2_1,    test_ex2_2,   test_ex2_3,                    # 6   / 3
+    test_ex2_1,    test_ex2_2,   test_ex2_3,                    # 6   / 3
     test_personal_data_entry,
 ]
 

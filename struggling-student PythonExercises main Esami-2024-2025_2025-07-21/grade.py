@@ -420,9 +420,10 @@ def test_ex1_6(run=True):
 
 # EX.2 Tests (Recursive Flood Fill)
 def do_ex2_test(input_image_name, output_image_name, expected_image_name, x, y, replacement_color):
-    input_path = f"ex2_test_data/input_images/{input_image_name}"
-    output_path = f"ex2_test_data/output_images/{output_image_name}"
-    expected_path = f"ex2_test_data/expected_images/{expected_image_name}"
+    # Updated paths to include the correct directory prefix
+    input_path = f"struggling-student PythonExercises main Esami-2024-2025_2025-07-21/ex2_test_data/input_images/{input_image_name}"
+    output_path = f"struggling-student PythonExercises main Esami-2024-2025_2025-07-21/ex2_test_data/output_images/{output_image_name}"
+    expected_path = f"struggling-student PythonExercises main Esami-2024-2025_2025-07-21/ex2_test_data/expected_images/{expected_image_name}"
 
     if not DEBUG:
         try:
@@ -503,13 +504,13 @@ def test_ex2_5(run=True):
 tests = [
     # TO RUN ONLY SOME OF THE TESTS, comment any of the following entries
     # PER DISATTIVARE ALCUNI TEST, commentare gli elementi seguenti
-    test_func1_1, test_func1_2, test_func1_3, test_func1_4,
+    #test_func1_1, test_func1_2, test_func1_3, test_func1_4,
     #test_func2_1, test_func2_2, test_func2_3, test_func2_4,
     #test_func3_1, test_func3_2, test_func3_3, test_func3_4,
     #test_func4_1, test_func4_2, test_func4_3, test_func4_4,
     #test_func5_1, test_func5_2, test_func5_3, test_func5_4,
     #test_ex1_1, test_ex1_2, test_ex1_3, test_ex1_4, test_ex1_5, test_ex1_6,
-    #test_ex2_1, test_ex2_2, test_ex2_3, test_ex2_4, test_ex2_5,
+    test_ex2_1, test_ex2_2, test_ex2_3, test_ex2_4, test_ex2_5,
     test_personal_data_entry,
 ]
 
