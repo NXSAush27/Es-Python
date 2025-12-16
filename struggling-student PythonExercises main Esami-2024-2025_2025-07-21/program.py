@@ -135,8 +135,26 @@ def tokenize_alphabetic(text):
 
 
 def func2(text_corpus, sentiment_lexicon, top_k_sentences):
-    # Completa il codice qui
-    pass
+    punteggi_frasi = []
+    somma_sentimenti = 0.0
+    for frase in text_corpus:
+      parole = tokenize_alphabetic(frase)
+      punteggio_frase = 0.0
+      for parola in parole:
+        if parola in sentiment_lexicon:
+          punteggio_frase += sentiment_lexicon[parola]
+      punteggio_frase = round(punteggio_frase, 2)
+      somma_sentimenti += punteggio_frase
+      punteggi_frasi.append((punteggio_frase, frase))
+    overall_sentiment = round(somma_sentimenti / len(text_corpus), 2) if len(text_corpus) > 0 else 0.0
+    frasi_positive = [item for item in punteggi_frasi if item[0] > 0]
+    frasi_positive.sort(key=lambda x: (-x[0], x[1]))
+    top_positive_sentences = frasi_positive[:top_k_sentences]
+    return {
+        'overall_sentiment': overall_sentiment,
+        'top_positive_sentences': top_positive_sentences,
+        'total_sentences_analyzed': len(text_corpus)
+    }
 
 # %% -------------------------------- FUNC.3 -------------------------------- #
 ''' func3: 4 punti
@@ -157,9 +175,22 @@ Esempio:
 
 IMPORTANTE: la lista `sentence_list` deve essere modificata alla fine dell'esecuzione della funzione.
 '''
-def func3(sentence_list, forbidden_words):
-    # Completa il codice qui
-    pass
+def func3(sentence_list: list, forbidden_words):
+  contatoreRimosse = 0
+  i = 0
+  while i < len(sentence_list):
+    lista_parole = tokenize_alphabetic(sentence_list[i])
+    sentinella = True
+    for parola in lista_parole:
+      if parola in forbidden_words:
+        sentinella = False
+        break
+    if not sentinella:
+      sentence_list.pop(i)
+      contatoreRimosse += 1
+    else:
+      i += 1
+  return contatoreRimosse
 
 # %% -------------------------------- FUNC.4 -------------------------------- #
 ''' func4: 4 punti
@@ -205,8 +236,14 @@ Esempio:
   }
 '''
 def func5(word_list):
-    # Completa il codice qui
-    pass
+  dizionario_anagrammi = {}
+  for parola in word_list:
+    forma_canonica = ''.join(sorted(parola.lower()))
+    if forma_canonica in dizionario_anagrammi:
+      dizionario_anagrammi[forma_canonica].add(parola)
+    else:
+      dizionario_anagrammi[forma_canonica] = {parola}
+  return dizionario_anagrammi
 
 
 # %% --------------------------------- EX.1 --------------------------------- #
@@ -240,9 +277,23 @@ Se target_value è 4, result sarà [1, 2, 4] (più a sinistra).
 
 Si puo' usare la classe BinaryTree del modulo tree.py
 '''
-def ex1(root, result, target_value):
-    # Completa il codice qui
-    pass
+def ex1(root, result: list, target_value):
+  percorso = []
+  max_depth = [-1]  # Lista per evitare problemi con l'assegnazione in funzioni annidate
+  trova_percorso(root, 0, target_value, percorso, result, max_depth)
+
+def trova_percorso(nodo, profondita, target_value, percorso_corrente, result, max_depth):
+    if nodo is None:
+        return
+    percorso_corrente.append(nodo.value)
+    if nodo.value == target_value:
+        if profondita > max_depth[0]:
+            max_depth[0] = profondita
+            result.clear()
+            result.extend(percorso_corrente)
+    trova_percorso(nodo.left, profondita + 1, target_value, percorso_corrente, result, max_depth)
+    trova_percorso(nodo.right, profondita + 1, target_value, percorso_corrente, result, max_depth)
+    percorso_corrente.pop()
 
 
 # %% --------------------------------- EX.2 --------------------------------- #
